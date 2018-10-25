@@ -1,0 +1,10 @@
+[package]
+name = "datamodel-parser"
+version = "0.1.0"
+authors = ["Joe Modjeski"]
+build = "build.rs"
+
+[build-dependencies]
+peg = { version = "0.5" }
+
+[dependencies]

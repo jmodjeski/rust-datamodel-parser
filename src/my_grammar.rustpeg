@@ -1,0 +1,13 @@
+use super::DataModelType;
+
+whitespace = #quiet<[ \n\t]+>
+keyword<E> = E whitespace*
+TYPE = keyword<"type">
+
+identifier -> &'input str
+  = $([A-Za-z0-9]+)
+
+pub modelType -> DataModelType<'input>
+  = TYPE n:identifier { DataModelType{ name: n} }
+
+
