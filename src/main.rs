@@ -3,8 +3,14 @@ use std::fs::File;
 use std::io::{Read};
 use std::path::Path;
 
-pub struct DataModelType<'a> {
-    name: &'a str
+pub struct DataModelTypeDeclaration<'a> {
+    name: &'a str,
+    field: &'a DataModelFieldDeclaration<'a>,
+}
+
+pub struct DataModelFieldDeclaration<'a> {
+    name: &'a str,
+    fieldType: &'a str,
 }
 
 mod my_grammar {

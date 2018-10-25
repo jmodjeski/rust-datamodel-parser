@@ -1,13 +1,20 @@
-use super::DataModelType;
+use super::DataModelTypeDeclaration;
+use super::DataModelFieldDeclaration;
 
 whitespace = #quiet<[ \n\t]+>
 keyword<E> = E whitespace*
 TYPE = keyword<"type">
+LBRACKET = keyword<"{">
+RBRACKET = keyword<"}">
+COLON = keyword<":">
 
 identifier -> &'input str
   = $([A-Za-z0-9]+)
 
-pub modelType -> DataModelType<'input>
-  = TYPE n:identifier { DataModelType{ name: n} }
+pub modelType -> DataModelTypeDeclaration<'input>
+  = TYPE n:identifier LBRACKET f:modelField RBRACKET { DataModelTypeDeclaration{ name: n, field: f} }
+
+pub modelField -> &DataModelFieldDeclaration<'input>
+  = n:identifier COLON t:identifier { DataModelFieldDeclaration{name: n, fieldType: t}}
 
 
