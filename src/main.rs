@@ -8,17 +8,30 @@ use std::fs::File;
 use std::io::{Read};
 use std::path::Path;
 
-
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize)]
 pub struct DataModelTypeDeclaration<'a> {
     name: &'a str,
     fields: Vec<DataModelFieldDeclaration<'a>>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize)]
 pub struct DataModelFieldDeclaration<'a> {
     name: &'a str,
     field_type: &'a str,
+    directives: Vec<DataModelFieldDirective<'a>>
+}
+
+#[derive(Serialize)]
+pub struct DataModelFieldDirective<'a> {
+    name: &'a str,
+    arguments: Vec<DataModelFieldDirectiveArg<'a>>,
+}
+
+#[derive(Serialize)]
+pub struct DataModelFieldDirectiveArg<'a> {
+    name: &'a str,
+    value: String,
+    quoted: bool,
 }
 
 mod my_grammar {

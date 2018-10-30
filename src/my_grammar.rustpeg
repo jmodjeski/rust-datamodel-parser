@@ -1,7 +1,8 @@
 use super::DataModelTypeDeclaration;
 use super::DataModelFieldDeclaration;
+use super::DataModelFieldDirective;
+use super::DataModelFieldDirectiveArg;
 
-whitespace = #quiet<[ \n\t]+>
 keyword<E> = E whitespace*
 TYPE = keyword<"type">
 LBRACKET = keyword<"{">
@@ -9,15 +10,38 @@ RBRACKET = keyword<"}">
 COLON = keyword<":">
 
 identifier -> &'input str
-  = $([A-Za-z0-9]+)
+  = $([A-Za-z][A-Za-z0-9]+)
 
 pub models -> Vec<DataModelTypeDeclaration<'input>>
-  = m:modelType* { m }
+  = m:model_type* { m }
 
-modelType -> DataModelTypeDeclaration<'input>
-  = TYPE n:identifier whitespace* LBRACKET f:modelField* RBRACKET whitespace* { DataModelTypeDeclaration{ name: n, fields: f} }
+model_type -> DataModelTypeDeclaration<'input>
+  = TYPE n:identifier whitespace* LBRACKET f:model_field* RBRACKET whitespace* { DataModelTypeDeclaration{ name: n, fields: f} }
 
-modelField -> DataModelFieldDeclaration<'input>
-  = n:identifier COLON t:identifier whitespace* { DataModelFieldDeclaration{name: n, field_type: t } }
+model_field -> DataModelFieldDeclaration<'input>
+  = n:identifier COLON t:identifier whitespace* d:directive* { DataModelFieldDeclaration{name: n, field_type: t, directives: d } }
 
+directives -> Vec<DataModelFieldDirective<'input>>
+  = d:directive* { d }
 
+directive -> DataModelFieldDirective<'input>
+  = '@' n:identifier whitespace* '(' whitespace* a:directive_arg* ')' whitespace* { DataModelFieldDirective{name: n, arguments: a} }
+  / '@' n:identifier whitespace* { DataModelFieldDirective{name: n, arguments: Vec::new() } }
+
+directive_arg -> DataModelFieldDirectiveArg<'input>
+ = n:identifier whitespace * '=' whitespace* v:doubleQuotedString whitespace* ','? whitespace* { DataModelFieldDirectiveArg{name: n, quoted: true, value: v.to_string()} }
+ / n:identifier whitespace * '=' whitespace* v:identifier whitespace* ','? whitespace* { DataModelFieldDirectiveArg{name: n, quoted: false, value: v.to_string()} }
+
+/* hijacked from https://github.com/kevinmehall/rust-peg/blob/master/src/grammar.rustpeg */
+doubleQuotedString -> String
+  = '"' s:simpleDoubleQuotedCharacter* '"' { s.into_iter().collect() }
+
+simpleDoubleQuotedCharacter -> char
+  = !('"' / "\\" / eolChar) c:$. { c.chars().next().unwrap() }
+
+eolChar
+  = [\n\r\u{2028}\u{2029}]
+
+/* Modeled after ECMA-262, 5th ed., 7.2. */
+whitespace
+  = #quiet<[ \t\n\u{00A0}\u{FEFF}\u{1680}\u{180E}\u{2000}-\u{200A}\u{202F}\u{205F}\u{3000}]>
