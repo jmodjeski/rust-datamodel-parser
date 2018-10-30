@@ -11,10 +11,13 @@ COLON = keyword<":">
 identifier -> &'input str
   = $([A-Za-z0-9]+)
 
-pub modelType -> DataModelTypeDeclaration<'input>
-  = TYPE n:identifier whitespace* LBRACKET f:modelField* RBRACKET { DataModelTypeDeclaration{ name: n, fields: f} }
+pub models -> Vec<DataModelTypeDeclaration<'input>>
+  = m:modelType* { m }
 
-pub modelField -> DataModelFieldDeclaration<'input>
+modelType -> DataModelTypeDeclaration<'input>
+  = TYPE n:identifier whitespace* LBRACKET f:modelField* RBRACKET whitespace* { DataModelTypeDeclaration{ name: n, fields: f} }
+
+modelField -> DataModelFieldDeclaration<'input>
   = n:identifier COLON t:identifier whitespace* { DataModelFieldDeclaration{name: n, field_type: t } }
 
 

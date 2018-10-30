@@ -1,3 +1,4 @@
-type MyType {
+type MyType1 {
   id: ID
+  name: String
 }

@@ -30,8 +30,8 @@ fn main() {
 	let mut source = String::new();
     File::open(Path::new(&args[1])).unwrap().read_to_string(&mut source).unwrap();
 
-    match my_grammar::modelType(&source) {
-        Ok(r) => println!("Parsed as: {}", serde_json::to_string(&r).unwrap()),
+    match my_grammar::models(&source) {
+        Ok(r) => println!("Parsed as: {}", serde_json::to_string_pretty(&r).unwrap()),
         Err(e) => println!("Parse error: {}", e),
     }
 }
