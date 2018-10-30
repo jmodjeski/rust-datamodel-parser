@@ -12,9 +12,9 @@ identifier -> &'input str
   = $([A-Za-z0-9]+)
 
 pub modelType -> DataModelTypeDeclaration<'input>
-  = TYPE n:identifier LBRACKET f:modelField RBRACKET { DataModelTypeDeclaration{ name: n, field: f} }
+  = TYPE n:identifier whitespace* LBRACKET f:modelField* RBRACKET { DataModelTypeDeclaration{ name: n, fields: f} }
 
-pub modelField -> &DataModelFieldDeclaration<'input>
-  = n:identifier COLON t:identifier { DataModelFieldDeclaration{name: n, fieldType: t}}
+pub modelField -> DataModelFieldDeclaration<'input>
+  = n:identifier COLON t:identifier whitespace* { DataModelFieldDeclaration{name: n, field_type: t } }
 
 
