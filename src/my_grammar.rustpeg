@@ -19,7 +19,15 @@ model_type -> DataModelTypeDeclaration<'input>
   = TYPE n:identifier whitespace* LBRACKET f:model_field* RBRACKET whitespace* { DataModelTypeDeclaration{ name: n, fields: f} }
 
 model_field -> DataModelFieldDeclaration<'input>
-  = n:identifier COLON t:identifier whitespace* d:directive* { DataModelFieldDeclaration{name: n, field_type: t, directives: d } }
+  = n:identifier COLON t:identifier r:model_field_required whitespace* d:directive* { DataModelFieldDeclaration{name: n, field_type: t, required: r, directives: d } }
+
+model_field_required -> bool
+  = n:'!'? { 
+    match n {
+      Some(v) => true,
+      None => false
+    }
+   }
 
 directives -> Vec<DataModelFieldDirective<'input>>
   = d:directive* { d }
@@ -38,6 +46,7 @@ doubleQuotedString -> String
 
 simpleDoubleQuotedCharacter -> char
   = !('"' / "\\" / eolChar) c:$. { c.chars().next().unwrap() }
+
 
 eolChar
   = [\n\r\u{2028}\u{2029}]

@@ -18,6 +18,7 @@ pub struct DataModelTypeDeclaration<'a> {
 pub struct DataModelFieldDeclaration<'a> {
     name: &'a str,
     field_type: &'a str,
+    required: bool,
     directives: Vec<DataModelFieldDirective<'a>>
 }
 
