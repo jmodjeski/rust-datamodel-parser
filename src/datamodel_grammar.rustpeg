@@ -1,8 +1,3 @@
-
-
-
-
-
 keyword<E> = E whitespace*
 TYPE = keyword<"type">
 LBRACKET = keyword<"{">
@@ -12,14 +7,42 @@ COLON = keyword<":">
 identifier -> &'input str
   = $([A-Za-z][A-Za-z0-9]+)
 
-pub models -> Vec<DataModelTypeDeclaration<'input>>
+pub models -> Vec<DataModelTypeDeclaration>
   = m:model_type* { m }
 
-model_type -> DataModelTypeDeclaration<'input>
-  = TYPE n:identifier whitespace* LBRACKET f:model_field* RBRACKET whitespace* { DataModelTypeDeclaration{ name: n, fields: f} }
+model_type -> DataModelTypeDeclaration
+  = TYPE n:identifier whitespace* LBRACKET f:model_field* RBRACKET whitespace* { 
+    DataModelTypeDeclaration{ 
+      name: n.to_owned(), 
+      fields: f
+    } 
+  }
 
-model_field -> DataModelFieldDeclaration<'input>
-  = n:identifier COLON t:identifier r:model_field_required whitespace* d:directive* { DataModelFieldDeclaration{name: n, field_type: t, required: r, directives: d } }
+model_field -> DataModelFieldDeclaration
+  = n:identifier COLON t:type_hierarchy d:directive* { 
+    DataModelFieldDeclaration{
+      name: n.to_owned(), 
+      field_type: t, 
+      directives: d 
+    } 
+  }
+
+type_hierarchy -> DataModelTypeRef
+  = '[' whitespace* c:type_hierarchy whitespace* ']' r:model_field_required whitespace* {
+    let inner: Option<Box<DataModelTypeRef>> = Some(Box::new(c));
+    DataModelTypeRef {
+      name: "[]".to_owned(),
+      inner_type: inner,
+      required: r
+    }
+  }
+  / t:identifier r:model_field_required whitespace* {
+    DataModelTypeRef {
+      name: t.to_owned(),
+      inner_type: None,
+      required: r
+    }
+  }
 
 model_field_required -> bool
   = n:'!'? { 
@@ -29,16 +52,38 @@ model_field_required -> bool
     }
    }
 
-directives -> Vec<DataModelFieldDirective<'input>>
+directives -> Vec<DataModelFieldDirective>
   = d:directive* { d }
 
-directive -> DataModelFieldDirective<'input>
-  = '@' n:identifier whitespace* '(' whitespace* a:directive_arg* ')' whitespace* { DataModelFieldDirective{name: n, arguments: a} }
-  / '@' n:identifier whitespace* { DataModelFieldDirective{name: n, arguments: Vec::new() } }
+directive -> DataModelFieldDirective
+  = '@' n:identifier whitespace* '(' whitespace* a:directive_arg* ')' whitespace* { 
+    DataModelFieldDirective{
+      name: n.to_owned(), 
+      arguments: a
+    } 
+  }
+  / '@' n:identifier whitespace* { 
+    DataModelFieldDirective{
+      name: n.to_owned(), 
+      arguments: Vec::new() 
+    } 
+  }
 
-directive_arg -> DataModelFieldDirectiveArg<'input>
- = n:identifier whitespace * '=' whitespace* v:doubleQuotedString whitespace* ','? whitespace* { DataModelFieldDirectiveArg{name: n, quoted: true, value: v.to_string()} }
- / n:identifier whitespace * '=' whitespace* v:identifier whitespace* ','? whitespace* { DataModelFieldDirectiveArg{name: n, quoted: false, value: v.to_string()} }
+directive_arg -> DataModelFieldDirectiveArg
+ = n:identifier whitespace * '=' whitespace* v:doubleQuotedString whitespace* ','? whitespace* { 
+   DataModelFieldDirectiveArg{
+      name: n.to_owned(),
+      quoted: true,
+      value: v.to_string()
+    } 
+  }
+ / n:identifier whitespace * '=' whitespace* v:identifier whitespace* ','? whitespace* { 
+   DataModelFieldDirectiveArg{
+      name: n.to_owned(),
+      quoted: false,
+      value: v.to_owned()
+    } 
+  }
 
 /* hijacked from https://github.com/kevinmehall/rust-peg/blob/master/src/grammar.rustpeg */
 doubleQuotedString -> String

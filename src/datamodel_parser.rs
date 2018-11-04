@@ -2,28 +2,34 @@
 #![cfg_attr(feature = "cargo-clippy", allow(suspicious_else_formatting, single_match, cyclomatic_complexity, unit_arg, naive_bytecount, len_zero))]
 
 #[derive(Serialize)]
-pub struct DataModelTypeDeclaration<'a> {
-    pub name: &'a str,
-    pub fields: Vec<DataModelFieldDeclaration<'a>>,
+pub struct DataModelTypeDeclaration {
+    pub name: String,
+    pub fields: Vec<DataModelFieldDeclaration>,
 }
 
 #[derive(Serialize)]
-pub struct DataModelFieldDeclaration<'a> {
-    pub name: &'a str,
-    pub field_type: &'a str,
+pub struct DataModelFieldDeclaration {
+    pub name: String,
+    pub field_type: DataModelTypeRef,
+    pub directives: Vec<DataModelFieldDirective>,
+}
+
+#[derive(Serialize)]
+pub struct DataModelTypeRef {
+    pub name: String,
+    pub inner_type: Option<Box<DataModelTypeRef>>,
     pub required: bool,
-    pub directives: Vec<DataModelFieldDirective<'a>>,
 }
 
 #[derive(Serialize)]
-pub struct DataModelFieldDirective<'a> {
-    pub name: &'a str,
-    pub arguments: Vec<DataModelFieldDirectiveArg<'a>>,
+pub struct DataModelFieldDirective {
+    pub name: String,
+    pub arguments: Vec<DataModelFieldDirectiveArg>,
 }
 
 #[derive(Serialize)]
-pub struct DataModelFieldDirectiveArg<'a> {
-    pub name: &'a str,
+pub struct DataModelFieldDirectiveArg {
+    pub name: String,
     pub value: String,
     pub quoted: bool,
 }
