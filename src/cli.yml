@@ -1,0 +1,11 @@
+name: Prisma Datamodel documenter
+version: "1.0"
+about: Reads in a Prisma Datamodel outputs JSON currently...
+args:
+  - data_model:
+      short: i
+      long: data-model
+      help: Sets the input datamodel file to use
+      required: true
+      takes_value: true
+
