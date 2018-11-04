@@ -2,7 +2,6 @@
 extern crate clap;
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
 
 use std::fs::File;
 use std::fs::OpenOptions;
@@ -15,6 +14,7 @@ use std::process::exit;
 use clap::App;
 
 mod datamodel_parser;
+mod json_formatter;
 
 fn main() {
     let yaml = load_yaml!("cli.yml");
@@ -41,7 +41,10 @@ fn main() {
         }
     };
 
-    let formatted = match serde_json::to_string_pretty(&model) {
+    let format_options = json_formatter::JSONFormatterOptions {
+        pretty: true
+    };
+    let formatted = match json_formatter::format(format_options, model) {
         Ok(buf) => buf,
         Err(e) => {
             eprintln!("Format error: {}", e);

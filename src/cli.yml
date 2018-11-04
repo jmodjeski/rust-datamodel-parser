@@ -12,3 +12,11 @@ args:
         long: output
         help: Send output to a file, if not preset send to STDOUT
         takes_value: true
+    - format:
+        long: format
+        short: f
+        help: Formatter to use for the output
+        possible_values:
+            - json
+        takes_value: true
+        default_value: json
