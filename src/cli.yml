@@ -12,7 +12,21 @@ args:
         takes_value: true
     - stdin:
         long: stdin
-        help: Use STDIN rather than the --data-model parameter.
+        help: Use STDIN rather than the --data-model argument.
         required: true
         conflicts_with:
             - data_model
+    - output:
+        short: o
+        long: output
+        required: true
+        help: Send output to a file.
+        conflicts_with:
+            - stdout
+        takes_value: true
+    - stdout:
+        long: stdout
+        required: true
+        help: Send output to a STDOUT rather than --output argument.
+        conflicts_with:
+            - output
