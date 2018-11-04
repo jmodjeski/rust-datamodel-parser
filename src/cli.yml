@@ -2,18 +2,17 @@ name: Prisma Datamodel documenter
 version: "1.0"
 about: Reads in a Prisma Datamodel outputs JSON currently...
 args:
-  - data_model:
-      short: i
-      long: data-model
-      help: Sets the input datamodel file to use.
-      required: true
-      conflicts_with:
-        - stdin
-      takes_value: true
-  - stdin:
-      long: stdin
-      help: Use STDIN rather than the --data-model parameter.
-      required: true
-      conflicts_with:
-        - data_model
-
+    - data_model:
+        short: i
+        long: data-model
+        help: Sets the input datamodel file to use.
+        required: true
+        conflicts_with:
+            - stdin
+        takes_value: true
+    - stdin:
+        long: stdin
+        help: Use STDIN rather than the --data-model parameter.
+        required: true
+        conflicts_with:
+            - data_model
