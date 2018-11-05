@@ -42,7 +42,7 @@ fn main() {
     };
 
     let format_options = json_formatter::JSONFormatterOptions {
-        pretty: true
+        pretty: matches.is_present("format_json_pretty")
     };
     let formatted = match json_formatter::format(format_options, model) {
         Ok(buf) => buf,

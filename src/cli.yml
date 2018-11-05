@@ -20,3 +20,6 @@ args:
             - json
         takes_value: true
         default_value: json
+    - format_json_pretty:
+        long: format-json-pretty
+        help: Format json with newlines and tabs
