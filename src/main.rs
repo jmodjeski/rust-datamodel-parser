@@ -15,6 +15,7 @@ use clap::App;
 
 mod datamodel_parser;
 mod json_formatter;
+mod dot_formatter;
 
 fn main() {
     let yaml = load_yaml!("cli.yml");
@@ -54,7 +55,17 @@ fn main() {
                         exit(1);
                     }
                 }
-            }
+            },
+            "dot" => {
+                let format_options = dot_formatter::DOTFormatterOptions {};
+                match dot_formatter::format(format_options, model) {
+                    Ok(buf) => buf,
+                    Err(e) => {
+                        eprintln!("Format error: {}", e);
+                        exit(1);
+                    }
+                }
+            },
             unk => panic!("unknown formatter: {}", unk),
         },
         None => panic!("Formatter should not reach this point."),

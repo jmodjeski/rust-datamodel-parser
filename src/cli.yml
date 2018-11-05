@@ -18,6 +18,7 @@ args:
         help: Formatter to use for the output
         possible_values:
             - json
+            - dot
         takes_value: true
         default_value: json
     - format_json_pretty:
