@@ -41,15 +41,23 @@ fn main() {
         }
     };
 
-    let format_options = json_formatter::JSONFormatterOptions {
-        pretty: matches.is_present("format_json_pretty")
-    };
-    let formatted = match json_formatter::format(format_options, model) {
-        Ok(buf) => buf,
-        Err(e) => {
-            eprintln!("Format error: {}", e);
-            exit(1);
-        }
+    let formatted = match matches.value_of("format") {
+        Some(s) => match s {
+            "json" => {
+                let format_options = json_formatter::JSONFormatterOptions {
+                    pretty: matches.is_present("format_json_pretty"),
+                };
+                match json_formatter::format(format_options, model) {
+                    Ok(buf) => buf,
+                    Err(e) => {
+                        eprintln!("Format error: {}", e);
+                        exit(1);
+                    }
+                }
+            }
+            unk => panic!("unknown formatter: {}", unk),
+        },
+        None => panic!("Formatter should not reach this point."),
     };
 
     let output_result: Result<usize, (std::io::Error, String)> = match matches.value_of("output") {
