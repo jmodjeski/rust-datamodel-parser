@@ -5,28 +5,10 @@ args:
     - data_model:
         short: i
         long: data-model
-        help: Sets the input datamodel file to use.
-        required: true
-        conflicts_with:
-            - stdin
+        help: Sets the input datamodel file to use, if not present use STDIN
         takes_value: true
-    - stdin:
-        long: stdin
-        help: Use STDIN rather than the --data-model argument.
-        required: true
-        conflicts_with:
-            - data_model
     - output:
         short: o
         long: output
-        required: true
-        help: Send output to a file.
-        conflicts_with:
-            - stdout
+        help: Send output to a file, if not preset send to STDOUT
         takes_value: true
-    - stdout:
-        long: stdout
-        required: true
-        help: Send output to a STDOUT rather than --output argument.
-        conflicts_with:
-            - output

@@ -19,70 +19,94 @@ mod datamodel_parser;
 fn main() {
     let yaml = load_yaml!("cli.yml");
     let matches = App::from_yaml(yaml).get_matches();
+
+    let model_source: Result<String, (std::io::Error, String)> =
+        match matches.value_of("data_model") {
+            Some(path) => read_datamodel(path),
+            None => read_stdin(),
+        };
+    let source: String = match model_source {
+        Ok(k) => k,
+        Err(e) => {
+            eprintln!("Error reading data model from '{}': {}", e.1, e.0);
+            exit(1);
+        }
+    };
+
+    let model = match datamodel_parser::models(&source) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("Parse error: {}", e);
+            exit(1);
+        }
+    };
+
+    let formatted = match serde_json::to_string_pretty(&model) {
+        Ok(buf) => buf,
+        Err(e) => {
+            eprintln!("Format error: {}", e);
+            exit(1);
+        }
+    };
+
+    let output_result: Result<usize, (std::io::Error, String)> = match matches.value_of("output") {
+        Some(path) => write_output(path, formatted),
+        None => write_stdout(formatted),
+    };
+
+    match output_result {
+        Ok(u) => u,
+        Err(e) => {
+            eprintln!("error writing to '{}': {}", e.1, e.0);
+            exit(1);
+        }
+    };
+    exit(0);
+}
+
+fn read_stdin() -> Result<String, (std::io::Error, String)> {
     let mut source = String::new();
+    match stdin().read_to_string(&mut source) {
+        Ok(s) => s,
+        Err(e) => return Err((e, "STDIN".to_owned())),
+    };
+    Ok(source)
+}
 
-    if matches.is_present("stdin") {
-        let x = read_stdin(&mut source);
-        if x.is_err() {
-            eprintln!("Error reading from STDIN {}", x.err().unwrap());
-            exit(1);
-        }
-    } else {
-        let v = matches.value_of("data_model").unwrap();
-        let x = read_datamodel(&v, &mut source);
-        if x.is_err() {
-            eprintln!("error reading from {}: {}", v, x.err().unwrap());
-            exit(1);
-        }
-    }
+fn read_datamodel(path: &str) -> Result<String, (std::io::Error, String)> {
+    let mut source = String::new();
+    let resolved_path = Path::new(&path);
+    let mut file = match File::open(resolved_path) {
+        Ok(f) => f,
+        Err(e) => return Err((e, path.to_owned())),
+    };
+    match file.read_to_string(&mut source) {
+        Ok(s) => s,
+        Err(e) => return Err((e, path.to_owned())),
+    };
+    Ok(source)
+}
 
-    match datamodel_parser::models(&source) {
-        Ok(r) => {
-            match serde_json::to_string_pretty(&r) {
-                Ok(buf) => {
-                    if matches.is_present("stdout") {
-                        let x = write_stdout(buf);
-                        if x.is_err() {
-                            eprintln!("Error writing to STDOUT {}", x.err().unwrap());
-                            exit(1);
-                        }
-                    } else {
-                        let v = matches.value_of("output").unwrap();
-                        let x = write_output(&v, buf);
-                        if x.is_err() {
-                            eprintln!("error writing to {}: {}", v, x.err().unwrap());
-                            exit(1);
-                        }
-                    }
-                },
-                Err(e) => eprintln!("Format error: {}", e),
-            }
-        },
-        Err(e) => eprintln!("Parse error: {}", e),
+fn write_stdout(source: String) -> Result<usize, (std::io::Error, String)> {
+    match stdout().write(&source.into_bytes()) {
+        Ok(s) => Ok(s),
+        Err(e) => Err((e, "STDOUT".to_owned())),
     }
 }
 
-fn read_stdin(source: &mut String) -> std::io::Result<()> {
-    stdin().read_to_string(&mut *source)?;
-    Ok(())
-}
-
-fn read_datamodel(path: &str, source: &mut String) -> std::io::Result<()> {
+fn write_output(path: &str, source: String) -> Result<usize, (std::io::Error, String)> {
     let resolved_path = Path::new(&path);
-    let mut file = File::open(resolved_path)?;
-    file.read_to_string(&mut *source)?;
-    Ok(())
-}
+    let mut file = match OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(resolved_path)
+    {
+        Ok(f) => f,
+        Err(e) => return Err((e, path.to_owned())),
+    };
 
-fn write_stdout(source: String) -> std::io::Result<()> {
-    // stdin().read_to_string(&mut *source)?;
-    stdout().write(&source.into_bytes())?;
-    Ok(())
-}
-
-fn write_output(path: &str, source: String) -> std::io::Result<()> {
-    let resolved_path = Path::new(&path);
-    let mut file = OpenOptions::new().create(true).write(true).open(resolved_path)?;
-    file.write(&source.into_bytes())?;
-    Ok(())
+    match file.write(&source.into_bytes()) {
+        Ok(s) => Ok(s),
+        Err(e) => Err((e, path.to_owned())),
+    }
 }
