@@ -6,5 +6,6 @@ type MyType1 {
 
 type MyType2 {
   id: ID! @unique
+  # Some commented out item
   parent: MyType1 @relation(name:"MyTypeChildren")
 }

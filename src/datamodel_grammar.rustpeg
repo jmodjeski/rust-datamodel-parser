@@ -1,17 +1,19 @@
-keyword<E> = E whitespace*
+keyword<E> = E _
 TYPE = keyword<"type">
 LBRACKET = keyword<"{">
 RBRACKET = keyword<"}">
 COLON = keyword<":">
 
+_ = #quiet<(whitespace / eol / comment)*>
+
 identifier -> &'input str
     = $([A-Za-z][A-Za-z0-9]+)
 
 pub models -> Vec<DataModelTypeDeclaration>
-    = m:model_type* { m }
+    = _ m:model_type* { m }
 
 model_type -> DataModelTypeDeclaration
-    = TYPE n:identifier whitespace* LBRACKET f:model_field* RBRACKET whitespace* { 
+    = TYPE n:identifier _ LBRACKET f:model_field* RBRACKET _ { 
         DataModelTypeDeclaration{ 
             name: n.to_owned(), 
             fields: f
@@ -28,7 +30,7 @@ model_field -> DataModelFieldDeclaration
     }
 
 type_hierarchy -> DataModelTypeRef
-    = '[' whitespace* c:type_hierarchy whitespace* ']' r:model_field_required whitespace* {
+    = '[' _ c:type_hierarchy _ ']' r:model_field_required _ {
         let inner: Option<Box<DataModelTypeRef>> = Some(Box::new(c));
         DataModelTypeRef {
             name: "[]".to_owned(),
@@ -36,7 +38,7 @@ type_hierarchy -> DataModelTypeRef
             required: r
         }
     }
-    / t:identifier r:model_field_required whitespace* {
+    / t:identifier r:model_field_required _ {
         DataModelTypeRef {
             name: t.to_owned(),
             inner_type: None,
@@ -56,13 +58,13 @@ directives -> Vec<DataModelFieldDirective>
     = d:directive* { d }
 
 directive -> DataModelFieldDirective
-    = '@' n:identifier whitespace* '(' whitespace* a:directive_arg* ')' whitespace* { 
+    = '@' n:identifier _ '(' _ a:directive_arg* ')' _ { 
         DataModelFieldDirective{
             name: n.to_owned(), 
             arguments: a
         } 
     }
-    / '@' n:identifier whitespace* { 
+    / '@' n:identifier _ { 
         DataModelFieldDirective{
             name: n.to_owned(), 
             arguments: Vec::new() 
@@ -70,14 +72,14 @@ directive -> DataModelFieldDirective
     }
 
 directive_arg -> DataModelFieldDirectiveArg
- = n:identifier whitespace * COLON whitespace* v:doubleQuotedString whitespace* ','? whitespace* { 
+ = n:identifier whitespace * COLON _ v:doubleQuotedString _ ','? _ { 
      DataModelFieldDirectiveArg{
             name: n.to_owned(),
             quoted: true,
             value: v.to_string()
         } 
     }
- / n:identifier whitespace * COLON whitespace* v:identifier whitespace* ','? whitespace* { 
+ / n:identifier whitespace * COLON _ v:identifier _ ','? _ { 
      DataModelFieldDirectiveArg{
             name: n.to_owned(),
             quoted: false,
@@ -92,6 +94,15 @@ doubleQuotedString -> String
 simpleDoubleQuotedCharacter -> char
     = !('"' / "\\" / eolChar) c:$. { c.chars().next().unwrap() }
 
+comment = "#" (!eolChar .)*
+
+/* Modeled after ECMA-262, 5th ed., 7.3. */
+eol
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u{2028}"
+  / "\u{2029}"
 
 eolChar
     = [\n\r\u{2028}\u{2029}]
