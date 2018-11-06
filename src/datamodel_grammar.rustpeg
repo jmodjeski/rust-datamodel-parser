@@ -70,14 +70,14 @@ directive -> DataModelFieldDirective
     }
 
 directive_arg -> DataModelFieldDirectiveArg
- = n:identifier whitespace * '=' whitespace* v:doubleQuotedString whitespace* ','? whitespace* { 
+ = n:identifier whitespace * COLON whitespace* v:doubleQuotedString whitespace* ','? whitespace* { 
      DataModelFieldDirectiveArg{
             name: n.to_owned(),
             quoted: true,
             value: v.to_string()
         } 
     }
- / n:identifier whitespace * '=' whitespace* v:identifier whitespace* ','? whitespace* { 
+ / n:identifier whitespace * COLON whitespace* v:identifier whitespace* ','? whitespace* { 
      DataModelFieldDirectiveArg{
             name: n.to_owned(),
             quoted: false,

@@ -1,10 +1,10 @@
 type MyType1 {
   id: ID! @unique
   name: String
-  children: [MyType2!]! @relation(name="MyTypeChildren", onDelete=CASCADE)
+  children: [MyType2!]! @relation(name:"MyTypeChildren", onDelete:CASCADE)
 }
 
 type MyType2 {
   id: ID! @unique
-  parent: MyType1 @relation(name="MyTypeChildren")
+  parent: MyType1 @relation(name:"MyTypeChildren")
 }
