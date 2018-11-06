@@ -1,4 +1,5 @@
 keyword<E> = E _
+SCALAR = keyword<"scalar">
 TYPE = keyword<"type">
 LBRACKET = keyword<"{">
 RBRACKET = keyword<"}">
@@ -9,15 +10,22 @@ _ = #quiet<(whitespace / eol / comment)*>
 identifier -> &'input str
     = $([A-Za-z][A-Za-z0-9]+)
 
-pub models -> Vec<DataModelTypeDeclaration>
-    = _ m:model_type* { m }
+pub models -> Vec<RootTypes>
+    = _ m:(model_type / scalar_type)* { m }
 
-model_type -> DataModelTypeDeclaration
+scalar_type -> RootTypes
+    = SCALAR _ n:identifier _ { 
+        RootTypes::Scalar(DataModelScalarDeclaration{ 
+            name: n.to_owned(), 
+        })
+    }
+
+model_type -> RootTypes
     = TYPE n:identifier _ LBRACKET f:model_field* RBRACKET _ { 
-        DataModelTypeDeclaration{ 
+        RootTypes::Type(DataModelTypeDeclaration{ 
             name: n.to_owned(), 
             fields: f
-        } 
+        })
     }
 
 model_field -> DataModelFieldDeclaration

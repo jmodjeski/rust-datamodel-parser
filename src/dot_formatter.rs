@@ -1,4 +1,4 @@
-use datamodel_parser::DataModelTypeDeclaration;
+use datamodel_parser::RootTypes;
 use datamodel_parser::DataModelTypeRef;
 use std::string::String;
 use std::fmt::{Write, Error};
@@ -7,7 +7,7 @@ pub struct DOTFormatterOptions {}
 
 pub fn format(
     _options: DOTFormatterOptions,
-    types: Vec<DataModelTypeDeclaration>,
+    types: Vec<RootTypes>,
 ) -> Result<String, Error> {
     let mut value = String::new();
 
@@ -15,20 +15,27 @@ pub fn format(
 
     let type_iter = types.iter();
     for val in type_iter {
-        value.write_str(&format!("\ttable{} [\r\n", val.name))?;
-        value.write_str("\t\tshape=plaintext\r\n")?;
-        value.write_str("\t\tlabel=<\r\n")?;
-        value.write_str("\t\t\t<table border='0' cellborder='1' cellspacing='0'>\r\n")?;
-        value.write_str(&format!("\t\t\t\t<tr><td colspan='2'>{}</td></tr>\r\n", val.name))?;
+        match val {
+            RootTypes::Scalar(_s) => {
+                // no op
+            },
+            RootTypes::Type(t) => {
+                value.write_str(&format!("\ttable{} [\r\n", t.name))?;
+                value.write_str("\t\tshape=plaintext\r\n")?;
+                value.write_str("\t\tlabel=<\r\n")?;
+                value.write_str("\t\t\t<table border='0' cellborder='1' cellspacing='0'>\r\n")?;
+                value.write_str(&format!("\t\t\t\t<tr><td colspan='2'>{}</td></tr>\r\n", t.name))?;
 
-        let field_iter = val.fields.iter();
-        for field in field_iter {
-            let t = get_field_type(&field.field_type);
-            value.write_str(&format!("\t\t\t\t<tr><td>{}</td><td>{}</td></tr>\r\n", field.name, t))?;
+                let field_iter = t.fields.iter();
+                for field in field_iter {
+                    let t = get_field_type(&field.field_type);
+                    value.write_str(&format!("\t\t\t\t<tr><td>{}</td><td>{}</td></tr>\r\n", field.name, t))?;
+                }
+
+                value.write_str("\t\t\t</table>")?;
+                value.write_str(">\t]\r\n")?;
+            }
         }
-
-        value.write_str("\t\t\t</table>")?;
-        value.write_str(">\t]\r\n")?;
     }
 
     value.write_str("}\r\n")?;

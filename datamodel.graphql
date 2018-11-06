@@ -1,3 +1,5 @@
+scalar DateTime
+
 type MyType1 {
   id: ID! @unique
   name: String

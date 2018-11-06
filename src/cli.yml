@@ -1,5 +1,5 @@
 name: Prisma Datamodel documenter
-version: "1.0"
+version: "0.2.0"
 about: Reads in a Prisma Datamodel outputs JSON currently...
 args:
     - data_model:

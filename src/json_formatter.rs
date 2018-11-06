@@ -1,6 +1,6 @@
 extern crate serde_json;
 
-use datamodel_parser::DataModelTypeDeclaration;
+use datamodel_parser::RootTypes;
 
 pub struct JSONFormatterOptions {
     pub pretty: bool,
@@ -8,7 +8,7 @@ pub struct JSONFormatterOptions {
 
 pub fn format(
     options: JSONFormatterOptions,
-    types: Vec<DataModelTypeDeclaration>,
+    types: Vec<RootTypes>,
 ) -> Result<String, String> {
     if options.pretty {
         match serde_json::to_string_pretty(&types) {

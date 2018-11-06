@@ -2,6 +2,17 @@
 #![cfg_attr(feature = "cargo-clippy", allow(suspicious_else_formatting, single_match, cyclomatic_complexity, unit_arg, naive_bytecount, len_zero))]
 
 #[derive(Serialize)]
+pub enum RootTypes {
+    Scalar(DataModelScalarDeclaration),
+    Type(DataModelTypeDeclaration)
+}
+
+#[derive(Serialize)]
+pub struct DataModelScalarDeclaration {
+    pub name: String,
+}
+
+#[derive(Serialize)]
 pub struct DataModelTypeDeclaration {
     pub name: String,
     pub fields: Vec<DataModelFieldDeclaration>,
